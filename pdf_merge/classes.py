@@ -10,10 +10,11 @@ from PIL import Image
 from PIL.ImageTk import PhotoImage
 from pypdf import PdfReader, PdfWriter
 from pypdf.errors import PdfReadError
-from tkinter import Tk, Toplevel, BOTTOM, LEFT, RIGHT, X
+from tkinter import Canvas, Tk, Toplevel, BOTTOM, LEFT, RIGHT, X
 from tkinter.filedialog import askopenfilenames, asksaveasfilename
 from tkinter.messagebox import showinfo, showwarning
-from tkinter.ttk import Button, Entry, Frame, Label, Separator
+from tkinter.ttk import (
+    Button, Entry, Frame, Label, Scrollbar, Separator, Style)
 
 from . import __url__, __version__
 from .language import IdiomaAplicativo
@@ -54,6 +55,7 @@ class FramePdf:
     def remove(self):
         self.frame.destroy()
         self.app.pdfs.remove(self)
+        self.app.atualiza_area_rolagem()
 
     def move_cima(self):
         idx = self.app.pdfs.index(self)
@@ -152,6 +154,83 @@ class Aplicativo(Tk, IdiomaAplicativo):
             frm_botoes, command=self.limpar_pdfs)
         self.btn_limpar.pack(side=LEFT, padx=10)
 
+        self.cria_lista_rolavel()
+
+    def cria_lista_rolavel(self) -> None:
+        """ cria a área com barra de rolagem onde os PDFs carregados são
+        listados. o Canvas é necessário porque o Frame do tkinter não tem
+        suporte a rolagem. """
+        frm_externo: Frame = Frame(self.frm_main)
+        frm_externo.pack(expand=True, fill="both", pady=(5, 0))
+
+        self.canvas_lista: Canvas = Canvas(
+            frm_externo, highlightthickness=0, borderwidth=0)
+        barra: Scrollbar = Scrollbar(
+            frm_externo, orient="vertical", command=self.canvas_lista.yview)
+        self.canvas_lista.configure(yscrollcommand=barra.set)
+        barra.pack(side=RIGHT, fill="y")
+        self.canvas_lista.pack(side=LEFT, expand=True, fill="both")
+
+        self.frm_lista: Frame = Frame(self.canvas_lista)
+        self.id_frm_lista: int = self.canvas_lista.create_window(
+            (0, 0), window=self.frm_lista, anchor="nw")
+
+        # mantém a área de rolagem do tamanho do conteúdo e o frame interno
+        # com a largura do canvas (para os PDFs ficarem centralizados)
+        self.frm_lista.bind(
+            "<Configure>",
+            lambda e: self.canvas_lista.configure(
+                scrollregion=self.canvas_lista.bbox("all")))
+        self.canvas_lista.bind(
+            "<Configure>",
+            lambda e: self.canvas_lista.itemconfigure(
+                self.id_frm_lista, width=e.width))
+
+        # a roda do mouse só controla a lista enquanto o cursor está sobre ela
+        self.canvas_lista.bind("<Enter>", self.ativa_rolagem)
+        self.canvas_lista.bind("<Leave>", self.desativa_rolagem)
+
+        self.pinta_fundo_lista()
+
+    def atualiza_area_rolagem(self) -> None:
+        """ o pack não recalcula o tamanho de um frame que ficou sem filhos,
+        então quando a lista esvazia a área de rolagem não encolhe sozinha e
+        precisa ser zerada manualmente """
+        if not self.pdfs:
+            self.canvas_lista.configure(scrollregion=(0, 0, 0, 0))
+            self.canvas_lista.yview_moveto(0)
+
+    def pinta_fundo_lista(self) -> None:
+        """ o Canvas não é um widget ttk, então seu fundo precisa ser pintado
+        manualmente com a cor do tema atual """
+        cor_fundo: str = Style().lookup("TFrame", "background")
+        if cor_fundo:
+            self.canvas_lista.configure(background=cor_fundo)
+
+    def ativa_rolagem(self, _evento) -> None:
+        """ liga a roda do mouse à lista de PDFs. o Linux gera os eventos
+        Button-4/5 e os demais sistemas o evento MouseWheel """
+        if self.sistema == "Linux":
+            self.canvas_lista.bind_all(
+                "<Button-4>",
+                lambda e: self.canvas_lista.yview_scroll(-1, "units"))
+            self.canvas_lista.bind_all(
+                "<Button-5>",
+                lambda e: self.canvas_lista.yview_scroll(1, "units"))
+        else:
+            self.canvas_lista.bind_all(
+                "<MouseWheel>",
+                lambda e: self.canvas_lista.yview_scroll(
+                    -1 if e.delta > 0 else 1, "units"))
+
+    def desativa_rolagem(self, _evento) -> None:
+        """ desliga a roda do mouse quando o cursor sai da lista """
+        if self.sistema == "Linux":
+            self.canvas_lista.unbind_all("<Button-4>")
+            self.canvas_lista.unbind_all("<Button-5>")
+        else:
+            self.canvas_lista.unbind_all("<MouseWheel>")
+
     def atualiza_interface(self) -> None:
         """ método usado para criar e atualizar os textos da aplicação. essa
         separação dos métodos de atualização é necessária porque não é possível
@@ -204,6 +283,8 @@ class Aplicativo(Tk, IdiomaAplicativo):
             sv_ttk.use_light_theme()
         else:
             sv_ttk.use_dark_theme()
+
+        self.pinta_fundo_lista()
 
         if self.sistema == "Windows":
             self.aplica_tema_barra_titulo()
@@ -377,7 +458,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
             self.msg_corrompidos(arqs_invalidos)
 
         for arq_valido in arqs_validos:
-            frame_pdf = FramePdf(self.frm_main, self, arq_valido)
+            frame_pdf = FramePdf(self.frm_lista, self, arq_valido)
             self.pdfs.append(frame_pdf)
             frame_pdf.pack()
 

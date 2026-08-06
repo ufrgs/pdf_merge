@@ -18,6 +18,10 @@ Os tipos de alterações
 
 ## [Não Lançado]
 
+### Adicionado
+
+- Barra de rolagem na lista de PDFs carregados, com suporte à roda do mouse; antes, com muitos arquivos, os últimos ficavam fora da janela e inacessíveis.
+
 ### Alterado
 
 - Atualizadas as dependências para versões compatíveis com o Python 3.14.
