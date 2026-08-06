@@ -23,6 +23,10 @@ Os tipos de alterações
 - Atualizadas as dependências para versões compatíveis com o Python 3.14.
 - Substituída a biblioteca PyPDF2 (descontinuada) pela sua sucessora [pypdf](https://pypi.org/project/pypdf/).
 
+### Corrigido
+
+- O aplicativo não fecha mais silenciosamente ao juntar quando um PDF foi apagado, movido ou corrompido após o carregamento, ou quando o destino não pode ser escrito; agora uma mensagem de aviso é exibida.
+
 ## [v1.3.0] - 2025-09-30
 
 ### Adicionado

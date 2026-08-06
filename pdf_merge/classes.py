@@ -408,10 +408,19 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
         pdf_escritor: PdfWriter = PdfWriter()
         for frame_pdf in self.pdfs:
-            with open(frame_pdf.path, "rb") as arq:
-                pdf_leitor: PdfReader = PdfReader(arq)
-                for pagina in pdf_leitor.pages:
-                    pdf_escritor.add_page(pagina)
+            # o arquivo pode ter sido apagado, movido ou corrompido entre o
+            # carregamento e a junção
+            try:
+                with open(frame_pdf.path, "rb") as arq:
+                    pdf_leitor: PdfReader = PdfReader(arq)
+                    for pagina in pdf_leitor.pages:
+                        pdf_escritor.add_page(pagina)
+            except (OSError, PdfReadError):
+                showwarning(
+                    self.pega_texto("warning"),
+                    self.pega_texto("read-error")
+                    + os.path.basename(frame_pdf.path))
+                return
 
         novo_pdf: str = asksaveasfile(
             filetypes=self.tipo_arq, defaultextension=".pdf")
@@ -422,8 +431,15 @@ class Aplicativo(Tk, IdiomaAplicativo):
             showwarning(self.pega_texto("warning"), self.pega_texto("no-name"))
             return
 
-        with open(novo_pdf.name, "wb") as arq:
-            pdf_escritor.write(arq)
+        try:
+            with open(novo_pdf.name, "wb") as arq:
+                pdf_escritor.write(arq)
+        except OSError:
+            showwarning(
+                self.pega_texto("warning"),
+                self.pega_texto("write-error")
+                + os.path.basename(novo_pdf.name))
+            return
 
         showinfo(
             self.pega_texto("success"),
