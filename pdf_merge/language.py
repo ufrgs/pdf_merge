@@ -27,7 +27,7 @@ class IdiomaAplicativo:
             "options": "Opções",
             "pdf-files": "Arquivos PDF",
             "project": "Juntador de PDFs",
-            "remove": "Remover",
+            "read-error": "Não foi possível ler o arquivo :\n",
             "select": "Selecione o Arquivo",
             "success": "Sucesso",
             "success-msg": "PDF juntado como :\n",
@@ -36,7 +36,7 @@ class IdiomaAplicativo:
             "title-window": "Juntador PDFs",
             "two-or-more": "Escolha dois ou mais PDFs",
             "warning": "Aviso",
-            "wrong-name": "Não escolha um arquivo PDF de origem como destino",
+            "write-error": "Não foi possível salvar o arquivo :\n",
         },
         "en": {
             "about": "About",
@@ -61,7 +61,7 @@ class IdiomaAplicativo:
             "options": "Options",
             "pdf-files": "PDF Files",
             "project": "PDFs Merger",
-            "remove": "Remove",
+            "read-error": "Could not read the file :\n",
             "select": "Select file",
             "success": "Success",
             "success-msg": "PDF merged as :\n",
@@ -70,7 +70,7 @@ class IdiomaAplicativo:
             "title-window": "PDFs Merger",
             "two-or-more": "Select two or more PDFs",
             "warning": "Warning",
-            "wrong-name": "Do not select a source PDF file as the destination",
+            "write-error": "Could not save the file :\n",
         },
         "de": {
             "about": "Über",
@@ -95,7 +95,7 @@ class IdiomaAplicativo:
             "options": "Optionen",
             "pdf-files": "PDF-Dateien",
             "project": "PDF-Zusammenführung",
-            "remove": "Entfernen",
+            "read-error": "Die Datei konnte nicht gelesen werden :\n",
             "select": "Datei auswählen",
             "success": "Erfolg",
             "success-msg": "PDF zusammengeführt als:\n",
@@ -104,11 +104,11 @@ class IdiomaAplicativo:
             "title-window": "PDF-Zusammenführer",
             "two-or-more": "Wählen Sie zwei oder mehr PDFs aus",
             "warning": "Warnung",
-            "wrong-name": "Wählen Sie keine Ausgangs-PDF-Datei als Ziel aus",
+            "write-error": "Die Datei konnte nicht gespeichert werden :\n",
         },
         "it": {
             "about": "Informazioni",
-            "about-title-window": "Informazioni sul Unificatore",
+            "about-title-window": "Informazioni sull'Unificatore",
             "clear": "Cancella",
             "close": "Chiudi",
             "contributor": f"Un progetto di {__author__}",
@@ -129,16 +129,16 @@ class IdiomaAplicativo:
             "options": "Opzioni",
             "pdf-files": "File PDF",
             "project": "Unificatore PDF",
-            "remove": "Rimuovi",
+            "read-error": "Impossibile leggere il file :\n",
             "select": "Seleziona file",
             "success": "Successo",
             "success-msg": "PDF unito come:\n",
             "themes": "Temi",
-            "title": "Benvenuto all\"Unificatore PDF",
+            "title": "Benvenuto all'Unificatore PDF",
             "title-window": "Unificatore PDF",
             "two-or-more": "Seleziona due o più PDF",
             "warning": "Avviso",
-            "wrong-name": "Non selezionare un file PDF di origine come destinazione",
+            "write-error": "Impossibile salvare il file :\n",
         },
         "es": {
             "about": "Acerca de",
@@ -163,7 +163,7 @@ class IdiomaAplicativo:
             "options": "Opciones",
             "pdf-files": "Archivos PDF",
             "project": "Combinador de PDFs",
-            "remove": "Eliminar",
+            "read-error": "No se pudo leer el archivo :\n",
             "select": "Seleccionar archivo",
             "success": "Éxito",
             "success-msg": "PDF combinado como:\n",
@@ -172,12 +172,12 @@ class IdiomaAplicativo:
             "title-window": "Combinador de PDFs",
             "two-or-more": "Seleccione dos o más PDFs",
             "warning": "Advertencia",
-            "wrong-name": "No seleccione un archivo PDF de origen como destino",
+            "write-error": "No se pudo guardar el archivo :\n",
         }
     }
 
     def __init__(self, idioma: str = "pt"):
-        """ define o idioma padão """
+        """ define o idioma padrão """
         self.idioma: str = idioma
 
     def pega_texto(self, chave: str) -> str:

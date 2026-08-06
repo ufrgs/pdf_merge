@@ -1,11 +1,5 @@
-altgraph==0.17.4
-jedi==0.19.1
-packaging==24.1
-parso==0.8.4
-pillow==11.0.0
-pyinstaller==6.11.0
-pyinstaller-hooks-contrib==2024.9
-PyPDF2==3.0.1
-pywinstyles==1.8
-setuptools==75.3.0
+# dependências para executar o aplicativo
+pillow==12.3.0
+pypdf==6.15.0
+pywinstyles==1.8; sys_platform == "win32"
 sv_ttk==2.6.1

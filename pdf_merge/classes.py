@@ -8,14 +8,16 @@ import webbrowser
 import sv_ttk
 from PIL import Image
 from PIL.ImageTk import PhotoImage
-from PyPDF2 import PdfReader, PdfWriter
-from PyPDF2.errors import PdfReadError
-from tkinter import Tk, Toplevel, BOTTOM, LEFT, RIGHT, X
-from tkinter.filedialog import askopenfilenames, asksaveasfile
+from pypdf import PdfReader, PdfWriter
+from pypdf.errors import PdfReadError
+from tkinter import Canvas, Tk, Toplevel, BOTTOM, LEFT, RIGHT, X
+from tkinter.filedialog import askopenfilenames, asksaveasfilename
 from tkinter.messagebox import showinfo, showwarning
-from tkinter.ttk import Button, Entry, Frame, Label, Separator
+from tkinter.ttk import (
+    Button, Entry, Frame, Label, Scrollbar, Separator, Style)
 
 from . import __url__, __version__
+from .config import carrega_config, salva_config
 from .language import IdiomaAplicativo
 
 
@@ -54,6 +56,7 @@ class FramePdf:
     def remove(self):
         self.frame.destroy()
         self.app.pdfs.remove(self)
+        self.app.atualiza_area_rolagem()
 
     def move_cima(self):
         idx = self.app.pdfs.index(self)
@@ -77,19 +80,30 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
     def __init__(self, idioma: str = "pt"):
         Tk.__init__(self)
-        IdiomaAplicativo.__init__(self, idioma)
 
-        self.pdfs: list = []
-        self.tipo_arq: list = [(self.pega_texto("pdf-files"), "*.pdf")]
+        # preferências salvas na última execução
+        self.preferencias: dict = carrega_config()
+        idioma_salvo: str = self.preferencias.get("idioma", idioma)
+        if idioma_salvo not in IdiomaAplicativo.textos:
+            idioma_salvo = idioma
+        IdiomaAplicativo.__init__(self, idioma_salvo)
+
+        self.pdfs: list[FramePdf] = []
+        self.tipo_arq: list[tuple[str, str]] = [
+            (self.pega_texto("pdf-files"), "*.pdf")]
         self.sistema: str = platform.system()
 
         # cria a interface
         self.configura_aplicativo()
         self.cria_frame_menu()
         self.cria_frame_principal()
-        sv_ttk.set_theme("light")  # interface clara padrão
 
-        self.atualiza_idioma_main()  # idioma padrão pt-br
+        tema_salvo: str = self.preferencias.get("tema", "claro")
+        if tema_salvo not in ("claro", "escuro"):
+            tema_salvo = "claro"
+        self.aplicar_tema(tema_salvo)
+
+        self.atualiza_idioma_main()
 
     def configura_aplicativo(self) -> None:
         """ método com as configurações da janela """
@@ -105,10 +119,12 @@ class Aplicativo(Tk, IdiomaAplicativo):
         """ busca o caminho do arquivo, compatível com o PyInstaller """
         # verifica se está em modo executável
         if getattr(sys, "frozen", False):
-            base_path: str = sys._MEIPASS
+            base_path: str = os.path.join(sys._MEIPASS, "pdf_merge")
         else:
-            base_path: str = os.path.abspath(".")
-        return os.path.join(base_path, "pdf_merge", pasta, nome_arquivo)
+            # diretório deste módulo, para funcionar independente de onde o
+            # programa foi executado
+            base_path: str = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(base_path, pasta, nome_arquivo)
 
     def cria_frame_menu(self) -> None:
         """ cria os widgets para o menu do aplicativo """
@@ -152,6 +168,95 @@ class Aplicativo(Tk, IdiomaAplicativo):
             frm_botoes, command=self.limpar_pdfs)
         self.btn_limpar.pack(side=LEFT, padx=10)
 
+        self.cria_lista_rolavel()
+
+    def cria_lista_rolavel(self) -> None:
+        """ cria a área com barra de rolagem onde os PDFs carregados são
+        listados. o Canvas é necessário porque o Frame do tkinter não tem
+        suporte a rolagem. """
+        frm_externo: Frame = Frame(self.frm_main)
+        frm_externo.pack(expand=True, fill="both", pady=(5, 0))
+
+        self.canvas_lista: Canvas = Canvas(
+            frm_externo, highlightthickness=0, borderwidth=0)
+        barra: Scrollbar = Scrollbar(
+            frm_externo, orient="vertical", command=self.canvas_lista.yview)
+        self.canvas_lista.configure(yscrollcommand=barra.set)
+        barra.pack(side=RIGHT, fill="y")
+        self.canvas_lista.pack(side=LEFT, expand=True, fill="both")
+
+        self.frm_lista: Frame = Frame(self.canvas_lista)
+        self.id_frm_lista: int = self.canvas_lista.create_window(
+            (0, 0), window=self.frm_lista, anchor="nw")
+
+        # mantém a área de rolagem do tamanho do conteúdo e o frame interno
+        # com a largura do canvas (para os PDFs ficarem centralizados)
+        self.frm_lista.bind(
+            "<Configure>",
+            lambda e: self.canvas_lista.configure(
+                scrollregion=self.canvas_lista.bbox("all")))
+        self.canvas_lista.bind(
+            "<Configure>",
+            lambda e: self.canvas_lista.itemconfigure(
+                self.id_frm_lista, width=e.width))
+
+        # a roda do mouse só controla a lista enquanto o cursor está sobre ela
+        self.canvas_lista.bind("<Enter>", self.ativa_rolagem)
+        self.canvas_lista.bind("<Leave>", self.desativa_rolagem)
+
+        self.pinta_fundo_lista()
+
+    def atualiza_area_rolagem(self) -> None:
+        """ o pack não recalcula o tamanho de um frame que ficou sem filhos,
+        então quando a lista esvazia a área de rolagem não encolhe sozinha e
+        precisa ser zerada manualmente """
+        if not self.pdfs:
+            self.canvas_lista.configure(scrollregion=(0, 0, 0, 0))
+            self.canvas_lista.yview_moveto(0)
+
+    def pinta_fundo_lista(self) -> None:
+        """ o Canvas não é um widget ttk, então seu fundo precisa ser pintado
+        manualmente com a cor do tema atual. o Sun Valley define a cor no
+        estilo raiz ".", mas só depois de processar o evento de troca de
+        tema, então há as cores como reserva para pintar imediatamente """
+        cor_fundo: str = Style(self).lookup(".", "background")
+        if not cor_fundo:
+            cor_fundo = \
+                "#1c1c1c" if sv_ttk.get_theme(self) == "dark" else "#fafafa"
+        self.canvas_lista.configure(background=cor_fundo)
+
+    def ativa_rolagem(self, _evento) -> None:
+        """ liga a roda do mouse à lista de PDFs. o Linux gera os eventos
+        Button-4/5 e os demais sistemas o evento MouseWheel """
+        if self.sistema == "Linux":
+            self.canvas_lista.bind_all(
+                "<Button-4>",
+                lambda e: self.canvas_lista.yview_scroll(-1, "units"))
+            self.canvas_lista.bind_all(
+                "<Button-5>",
+                lambda e: self.canvas_lista.yview_scroll(1, "units"))
+        else:
+            self.canvas_lista.bind_all(
+                "<MouseWheel>",
+                lambda e: self.canvas_lista.yview_scroll(
+                    -1 if e.delta > 0 else 1, "units"))
+
+    def desativa_rolagem(self, _evento) -> None:
+        """ desliga a roda do mouse quando o cursor sai da lista """
+        if self.sistema == "Linux":
+            self.canvas_lista.unbind_all("<Button-4>")
+            self.canvas_lista.unbind_all("<Button-5>")
+        else:
+            self.canvas_lista.unbind_all("<MouseWheel>")
+
+    def define_texto(self, idioma: str) -> None:
+        """ além de trocar o idioma, guarda a escolha para a próxima
+        execução """
+        super().define_texto(idioma)
+        if self.preferencias.get("idioma") != idioma:
+            self.preferencias["idioma"] = idioma
+            salva_config(self.preferencias)
+
     def atualiza_interface(self) -> None:
         """ método usado para criar e atualizar os textos da aplicação. essa
         separação dos métodos de atualização é necessária porque não é possível
@@ -173,11 +278,11 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
         # botões e label dos idiomas
         self.lbl_idioma["text"] = self.pega_texto("language")
-        self.btn_pt ["text"] = self.pega_texto("lang_pt")
-        self.btn_en ["text"] = self.pega_texto("lang_en")
-        self.btn_es ["text"] = self.pega_texto("lang_es")
-        self.btn_de ["text"] = self.pega_texto("lang_de")
-        self.btn_it ["text"] = self.pega_texto("lang_it")
+        self.btn_pt["text"] = self.pega_texto("lang_pt")
+        self.btn_en["text"] = self.pega_texto("lang_en")
+        self.btn_es["text"] = self.pega_texto("lang_es")
+        self.btn_de["text"] = self.pega_texto("lang_de")
+        self.btn_it["text"] = self.pega_texto("lang_it")
 
     def atualiza_idioma_main(self) -> None:
         """ método usado para criar e atualizar os textos da janela principal
@@ -196,7 +301,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
         self.btn_limpar["text"] = self.pega_texto("clear")
 
         # variáveis
-        self.tipo_arq: list = [(self.pega_texto("pdf-files"), "*.pdf")]
+        self.tipo_arq = [(self.pega_texto("pdf-files"), "*.pdf")]
 
     def aplicar_tema(self, tema: str) -> None:
         """ aplica o tema escolhido pelo usuário """
@@ -204,6 +309,13 @@ class Aplicativo(Tk, IdiomaAplicativo):
             sv_ttk.use_light_theme()
         else:
             sv_ttk.use_dark_theme()
+
+        self.pinta_fundo_lista()
+
+        # guarda a escolha para a próxima execução
+        if self.preferencias.get("tema") != tema:
+            self.preferencias["tema"] = tema
+            salva_config(self.preferencias)
 
         if self.sistema == "Windows":
             self.aplica_tema_barra_titulo()
@@ -225,14 +337,14 @@ class Aplicativo(Tk, IdiomaAplicativo):
             pywinstyles.apply_style(
                 self, "dark" if sv_ttk.get_theme() == "dark" else "normal")
 
-            # gambiara para atualizar a cor da barra de título no Windows 10
+            # gambiarra para atualizar a cor da barra de título no Windows 10
             # (não atualiza instantaneamente como no Windows 11)
             self.wm_attributes("-alpha", 0.99)
             self.wm_attributes("-alpha", 1)
 
     def abre_janela_opcoes(self) -> None:
         """ abre um toplevel com as opções disponíveis """
-        self.janela_opcoes:Toplevel = Toplevel(self)
+        self.janela_opcoes: Toplevel = Toplevel(self)
         self.janela_opcoes.minsize(200, 275)
         self.janela_opcoes.transient(self)
         self.janela_opcoes.grab_set()
@@ -253,7 +365,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
         self.lbl_idioma: Label = Label(self.janela_opcoes)
         self.lbl_idioma.pack(pady=5)
         self.btn_pt: Button = Button(
-            self.janela_opcoes,command=lambda: self.define_texto("pt"))
+            self.janela_opcoes, command=lambda: self.define_texto("pt"))
         self.btn_pt.pack(pady=5)
         self.btn_en: Button = Button(
             self.janela_opcoes, command=lambda: self.define_texto("en"))
@@ -293,10 +405,10 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
         try:
             img_caminho: str = self.caminho_arquivo("assets", "cpd-logo.jpg")
-            img_logo: Image = Image.open(img_caminho)
+            img_logo: Image.Image = Image.open(img_caminho)
             img_largura: int = img_logo.size[0]
             img_altura: int = img_logo.size[1]
-            img_logo: Image = img_logo.resize(
+            img_logo = img_logo.resize(
                 (img_largura//6, img_altura//6), Image.LANCZOS)
             logo: PhotoImage = PhotoImage(img_logo)
             lbl_logo: Label = Label(janela_sobre, image=logo, cursor="hand2")
@@ -357,8 +469,8 @@ class Aplicativo(Tk, IdiomaAplicativo):
             f.pack()
 
     def cria_frame(self) -> None:
-        """ abre a janela para carregar novo PDF e adcionar um novo frame """
-        arqs_path: tuple[str] = askopenfilenames(
+        """ abre a janela para carregar novo PDF e adicionar um novo frame """
+        arqs_path: tuple[str, ...] = askopenfilenames(
                 title=self.pega_texto("select"),
                 filetypes=self.tipo_arq)
 
@@ -377,7 +489,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
             self.msg_corrompidos(arqs_invalidos)
 
         for arq_valido in arqs_validos:
-            frame_pdf = FramePdf(self.frm_main, self, arq_valido)
+            frame_pdf = FramePdf(self.frm_lista, self, arq_valido)
             self.pdfs.append(frame_pdf)
             frame_pdf.pack()
 
@@ -389,7 +501,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
                 if len(leitor.pages) == 0:
                     return False
             return True
-        except (PdfReadError, ValueError):
+        except (OSError, PdfReadError, ValueError):
             return False
 
     def merge_pdfs(self) -> None:
@@ -408,12 +520,21 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
         pdf_escritor: PdfWriter = PdfWriter()
         for frame_pdf in self.pdfs:
-            with open(frame_pdf.path, "rb") as arq:
-                pdf_leitor: PdfReader = PdfReader(arq)
-                for pagina in pdf_leitor.pages:
-                    pdf_escritor.add_page(pagina)
+            # o arquivo pode ter sido apagado, movido ou corrompido entre o
+            # carregamento e a junção
+            try:
+                with open(frame_pdf.path, "rb") as arq:
+                    pdf_leitor: PdfReader = PdfReader(arq)
+                    for pagina in pdf_leitor.pages:
+                        pdf_escritor.add_page(pagina)
+            except (OSError, PdfReadError):
+                showwarning(
+                    self.pega_texto("warning"),
+                    self.pega_texto("read-error")
+                    + os.path.basename(frame_pdf.path))
+                return
 
-        novo_pdf: str = asksaveasfile(
+        novo_pdf: str = asksaveasfilename(
             filetypes=self.tipo_arq, defaultextension=".pdf")
 
         # nenhum nome foi escolhido para salvar
@@ -422,10 +543,17 @@ class Aplicativo(Tk, IdiomaAplicativo):
             showwarning(self.pega_texto("warning"), self.pega_texto("no-name"))
             return
 
-        with open(novo_pdf.name, "wb") as arq:
-            pdf_escritor.write(arq)
+        try:
+            with open(novo_pdf, "wb") as arq:
+                pdf_escritor.write(arq)
+        except OSError:
+            showwarning(
+                self.pega_texto("warning"),
+                self.pega_texto("write-error")
+                + os.path.basename(novo_pdf))
+            return
 
         showinfo(
             self.pega_texto("success"),
-            self.pega_texto("success-msg") + os.path.basename(novo_pdf.name))
+            self.pega_texto("success-msg") + os.path.basename(novo_pdf))
 

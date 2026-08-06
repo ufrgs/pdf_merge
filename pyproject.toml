@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "juntador-pdfs"
+description = "Aplicativo gráfico para juntar arquivos PDF com privacidade"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Augusto Hertzog" }]
+requires-python = ">=3.10"
+dynamic = ["version"]
+dependencies = [
+    "pillow",
+    "pypdf",
+    "pywinstyles; sys_platform == 'win32'",
+    "sv_ttk",
+]
+
+[project.urls]
+Homepage = "https://github.com/ufrgs/pdf_merge"
+
+[project.gui-scripts]
+juntador-pdfs = "pdf_merge.main:main"
+
+[tool.setuptools]
+packages = ["pdf_merge"]
+
+[tool.setuptools.package-data]
+pdf_merge = ["assets/*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "pdf_merge.__version__" }

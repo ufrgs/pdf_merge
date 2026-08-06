@@ -4,6 +4,12 @@
 # cache do Python
 __pycache__/
 
+# cache do pytest
+.pytest_cache/
+
+# metadados de instalação do pacote
+*.egg-info/
+
 # arquivos e pastas do pyinstaller
 build/
 dist/

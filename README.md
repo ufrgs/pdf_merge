@@ -48,7 +48,7 @@ Então o projeto atual foi criado de forma [open-source](https://pt.wikipedia.or
 Acesse a página de [Download do Juntador de PDFs](https://github.com/ufrgs/pdf_merge/releases) e baixe a versão específica de seu sistema operacional.
 
 Use o botão *Carregar* para abrir a janela e selecionar um ou mais arquivos.
-Eles irão aparecer em uma lista dentro da janela pricipal. Ao lado de cada PDF carregado haverá 3 botões :
+Eles irão aparecer em uma lista dentro da janela principal. Ao lado de cada PDF carregado haverá 3 botões :
 - `X` : para remover aquele PDF em específico;
 - `∧` : para mover o PDF para cima;
 - `∨` : para mover o PDF para baixo;
@@ -60,7 +60,7 @@ Quando usar o botão *Juntar*, um novo PDF será criado seguindo a ordem dos doc
 Ele usa o [Python](https://www.python.org/) e a interface gráfica [tkinter](https://docs.python.org/3/library/tkinter.html) para tornar a fusão dos PDFs possível.
 
 Pacotes externos :
-- [PyPDF2](https://pypi.org/project/PyPDF2/) realiza a fusão dos arquivos PDFs;
+- [pypdf](https://pypi.org/project/pypdf/) realiza a fusão dos arquivos PDFs;
 - [pyinstaller](https://pypi.org/project/pyinstaller/) cria o executável;
 - [Pillow](https://pypi.org/project/pillow/) exibe as imagens;
 - [py-window-styles](https://pypi.org/project/pywinstyles/) barra de tarefas do Windows;
@@ -70,7 +70,7 @@ Tema :
 
 ## preparação
 
-Abaixo há a realação de comandos necessários para criar um ambiente virtual, ativá-lo e instalar as dependências.
+Abaixo há a relação de comandos necessários para criar um ambiente virtual, ativá-lo e instalar as dependências.
 
 ### linux e macos
 
@@ -88,11 +88,27 @@ pdf_merge❯ .venv\Scripts\activate
 pdf_merge❯ pip install -r requisitos.txt
 ```
 
+Para desenvolver (executar os testes ou criar o executável), instale também os requisitos de desenvolvimento :
+
+```bash
+pdf_merge❯ pip install -r requisitos-dev.txt
+```
+
 Para executar, basta digitar no terminal / prompt de comando :
 
 ```bash
 pdf_merge❯ python -m pdf_merge.main
 ```
+
+## testes
+
+Os testes usam o [pytest](https://pypi.org/project/pytest/) e cobrem a validação dos PDFs, os idiomas e o fluxo de junção com a interface real (os testes de interface são pulados automaticamente em ambientes sem display).
+
+```bash
+pdf_merge❯ python -m pytest
+```
+
+Eles também são executados automaticamente pelo GitHub Actions a cada push.
 
 ## build
 
@@ -102,8 +118,10 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 ```bash
 ❯ pyinstaller --onefile \
+    --name "juntador-pdfs" \
+    --noupx \
     --add-data "pdf_merge/assets/cpd-logo.jpg:pdf_merge/assets" \
-    --add-data ".venv/lib/python3.13/site-packages/sv_ttk:sv_ttk" \
+    --collect-data "sv_ttk" \
     --hidden-import="PIL._tkinter_finder" \
     --noconsole \
     pdf_merge/main.py
@@ -113,10 +131,13 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 ```powershell
 ❯ pyinstaller --onefile `
+    --name "juntador-pdfs" `
+    --noupx `
     --icon "pdf_merge/assets/ufrgs.ico" `
+    --version-file "version_info.txt" `
     --add-data "pdf_merge/assets/ufrgs.ico;pdf_merge/assets" `
     --add-data "pdf_merge/assets/cpd-logo.jpg;pdf_merge/assets" `
-    --add-data ".venv/Lib/site-packages/sv_ttk;sv_ttk" `
+    --collect-data "sv_ttk" `
     --hidden-import="PIL._tkinter_finder" `
     --noconsole `
      pdf_merge/main.py
@@ -124,7 +145,7 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 ## todo
 
-- [ ] persistir alterações como tema e idioma;
+- [x] persistir alterações como tema e idioma;
 - [x] adicionar remoção individual do frame (atualmente funciona com FILO);
 - [x] adicionar idioma espanhol;
 - [x] adicionar mais idiomas (italiano e alemão);
@@ -132,13 +153,14 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 ## versões
 
+- `v1.4.0` : temas persistidos e diversas correções de erros;
 - `v1.3.0` : PDFs podem ser reorganizados;
 - `v1.2.6` : verificação de PDFs corrompidos e organização;
-- `v1.2.5` : adicionado idioma espanho e removido o \_\_init\_\_.py;
 
 <details>
 <summary>mais antigas</summary>
 
+- `v1.2.5` : adicionado idioma espanhol e removido o \_\_init\_\_.py;
 - `v1.2.4` : anotações foram adicionadas;
 - `v1.2.3` : melhor comentários e organização do código;
 - `v1.2.2` : ajustes para o executável;

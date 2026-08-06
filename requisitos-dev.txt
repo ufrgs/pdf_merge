@@ -1,0 +1,4 @@
+# dependências para desenvolver: testes e criação do executável
+-r requisitos.txt
+pyinstaller==6.21.0
+pytest==9.1.1
