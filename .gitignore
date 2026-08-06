@@ -4,6 +4,9 @@
 # cache do Python
 __pycache__/
 
+# cache do pytest
+.pytest_cache/
+
 # arquivos e pastas do pyinstaller
 build/
 dist/

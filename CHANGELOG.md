@@ -21,6 +21,8 @@ Os tipos de alterações
 ### Adicionado
 
 - Barra de rolagem na lista de PDFs carregados, com suporte à roda do mouse; antes, com muitos arquivos, os últimos ficavam fora da janela e inacessíveis.
+- Integração contínua no GitHub Actions executando os testes a cada push.
+- Testes automatizados com [pytest](https://pypi.org/project/pytest/) para a validação de PDFs, os idiomas e o fluxo de junção.
 
 ### Alterado
 

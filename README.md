@@ -94,6 +94,16 @@ Para executar, basta digitar no terminal / prompt de comando :
 pdf_merge❯ python -m pdf_merge.main
 ```
 
+## testes
+
+Os testes usam o [pytest](https://pypi.org/project/pytest/) e cobrem a validação dos PDFs, os idiomas e o fluxo de junção com a interface real (os testes de interface são pulados automaticamente em ambientes sem display).
+
+```bash
+pdf_merge❯ python -m pytest
+```
+
+Eles também são executados automaticamente pelo GitHub Actions a cada push.
+
 ## build
 
 Para criar o executável, é preciso executar o `pyinstaller` a partir do Terminal/Prompt de Comando. Isso vai criar um executável que pode ser distribuído.

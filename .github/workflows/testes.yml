@@ -1,0 +1,25 @@
+name: Testes
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Instala as dependências
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb
+          python -m pip install -r requisitos.txt
+
+      # o xvfb cria um display virtual para os testes da interface gráfica
+      - name: Executa os testes
+        run: xvfb-run -a python -m pytest
