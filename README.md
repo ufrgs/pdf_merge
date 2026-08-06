@@ -47,6 +47,8 @@ Então o projeto atual foi criado de forma [open-source](https://pt.wikipedia.or
 
 Acesse a página de [Download do Juntador de PDFs](https://github.com/ufrgs/pdf_merge/releases) e baixe a versão específica de seu sistema operacional.
 
+Há executáveis prontos para Windows e Linux. Por enquanto, não há executável pronto para macOS : é preciso gerar o build manualmente a partir do código-fonte, seguindo as seções de [preparação](#preparação) e [build](#build).
+
 Use o botão *Carregar* para abrir a janela e selecionar um ou mais arquivos.
 Eles irão aparecer em uma lista dentro da janela principal. Ao lado de cada PDF carregado haverá 3 botões :
 - `X` : para remover aquele PDF em específico;
@@ -126,6 +128,10 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
     --noconsole \
     pdf_merge/main.py
 ```
+
+### macos
+
+O comando é o mesmo do Linux. Vale saber que o executável gerado vale apenas para a arquitetura da máquina em que foi criado : um build feito em um Mac Intel roda nos Macs Apple Silicon através do Rosetta 2, mas o contrário não funciona.
 
 ### windows
 
