@@ -102,6 +102,8 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 ```bash
 ❯ pyinstaller --onefile \
+    --name "juntador-pdfs" \
+    --noupx \
     --add-data "pdf_merge/assets/cpd-logo.jpg:pdf_merge/assets" \
     --add-data ".venv/lib/python3.13/site-packages/sv_ttk:sv_ttk" \
     --hidden-import="PIL._tkinter_finder" \
@@ -113,7 +115,10 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 ```powershell
 ❯ pyinstaller --onefile `
+    --name "juntador-pdfs" `
+    --noupx `
     --icon "pdf_merge/assets/ufrgs.ico" `
+    --version-file "version_info.txt" `
     --add-data "pdf_merge/assets/ufrgs.ico;pdf_merge/assets" `
     --add-data "pdf_merge/assets/cpd-logo.jpg;pdf_merge/assets" `
     --add-data ".venv/Lib/site-packages/sv_ttk;sv_ttk" `
