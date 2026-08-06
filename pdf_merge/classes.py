@@ -17,6 +17,7 @@ from tkinter.ttk import (
     Button, Entry, Frame, Label, Scrollbar, Separator, Style)
 
 from . import __url__, __version__
+from .config import carrega_config, salva_config
 from .language import IdiomaAplicativo
 
 
@@ -79,19 +80,30 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
     def __init__(self, idioma: str = "pt"):
         Tk.__init__(self)
-        IdiomaAplicativo.__init__(self, idioma)
 
-        self.pdfs: list = []
-        self.tipo_arq: list = [(self.pega_texto("pdf-files"), "*.pdf")]
+        # preferências salvas na última execução
+        self.preferencias: dict = carrega_config()
+        idioma_salvo: str = self.preferencias.get("idioma", idioma)
+        if idioma_salvo not in IdiomaAplicativo.textos:
+            idioma_salvo = idioma
+        IdiomaAplicativo.__init__(self, idioma_salvo)
+
+        self.pdfs: list[FramePdf] = []
+        self.tipo_arq: list[tuple[str, str]] = [
+            (self.pega_texto("pdf-files"), "*.pdf")]
         self.sistema: str = platform.system()
 
         # cria a interface
         self.configura_aplicativo()
         self.cria_frame_menu()
         self.cria_frame_principal()
-        sv_ttk.set_theme("light")  # interface clara padrão
 
-        self.atualiza_idioma_main()  # idioma padrão pt-br
+        tema_salvo: str = self.preferencias.get("tema", "claro")
+        if tema_salvo not in ("claro", "escuro"):
+            tema_salvo = "claro"
+        self.aplicar_tema(tema_salvo)
+
+        self.atualiza_idioma_main()
 
     def configura_aplicativo(self) -> None:
         """ método com as configurações da janela """
@@ -204,10 +216,14 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
     def pinta_fundo_lista(self) -> None:
         """ o Canvas não é um widget ttk, então seu fundo precisa ser pintado
-        manualmente com a cor do tema atual """
-        cor_fundo: str = Style().lookup("TFrame", "background")
-        if cor_fundo:
-            self.canvas_lista.configure(background=cor_fundo)
+        manualmente com a cor do tema atual. o Sun Valley define a cor no
+        estilo raiz ".", mas só depois de processar o evento de troca de
+        tema, então há as cores como reserva para pintar imediatamente """
+        cor_fundo: str = Style(self).lookup(".", "background")
+        if not cor_fundo:
+            cor_fundo = \
+                "#1c1c1c" if sv_ttk.get_theme(self) == "dark" else "#fafafa"
+        self.canvas_lista.configure(background=cor_fundo)
 
     def ativa_rolagem(self, _evento) -> None:
         """ liga a roda do mouse à lista de PDFs. o Linux gera os eventos
@@ -233,6 +249,14 @@ class Aplicativo(Tk, IdiomaAplicativo):
         else:
             self.canvas_lista.unbind_all("<MouseWheel>")
 
+    def define_texto(self, idioma: str) -> None:
+        """ além de trocar o idioma, guarda a escolha para a próxima
+        execução """
+        super().define_texto(idioma)
+        if self.preferencias.get("idioma") != idioma:
+            self.preferencias["idioma"] = idioma
+            salva_config(self.preferencias)
+
     def atualiza_interface(self) -> None:
         """ método usado para criar e atualizar os textos da aplicação. essa
         separação dos métodos de atualização é necessária porque não é possível
@@ -254,11 +278,11 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
         # botões e label dos idiomas
         self.lbl_idioma["text"] = self.pega_texto("language")
-        self.btn_pt ["text"] = self.pega_texto("lang_pt")
-        self.btn_en ["text"] = self.pega_texto("lang_en")
-        self.btn_es ["text"] = self.pega_texto("lang_es")
-        self.btn_de ["text"] = self.pega_texto("lang_de")
-        self.btn_it ["text"] = self.pega_texto("lang_it")
+        self.btn_pt["text"] = self.pega_texto("lang_pt")
+        self.btn_en["text"] = self.pega_texto("lang_en")
+        self.btn_es["text"] = self.pega_texto("lang_es")
+        self.btn_de["text"] = self.pega_texto("lang_de")
+        self.btn_it["text"] = self.pega_texto("lang_it")
 
     def atualiza_idioma_main(self) -> None:
         """ método usado para criar e atualizar os textos da janela principal
@@ -277,7 +301,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
         self.btn_limpar["text"] = self.pega_texto("clear")
 
         # variáveis
-        self.tipo_arq: list = [(self.pega_texto("pdf-files"), "*.pdf")]
+        self.tipo_arq = [(self.pega_texto("pdf-files"), "*.pdf")]
 
     def aplicar_tema(self, tema: str) -> None:
         """ aplica o tema escolhido pelo usuário """
@@ -287,6 +311,11 @@ class Aplicativo(Tk, IdiomaAplicativo):
             sv_ttk.use_dark_theme()
 
         self.pinta_fundo_lista()
+
+        # guarda a escolha para a próxima execução
+        if self.preferencias.get("tema") != tema:
+            self.preferencias["tema"] = tema
+            salva_config(self.preferencias)
 
         if self.sistema == "Windows":
             self.aplica_tema_barra_titulo()
@@ -308,14 +337,14 @@ class Aplicativo(Tk, IdiomaAplicativo):
             pywinstyles.apply_style(
                 self, "dark" if sv_ttk.get_theme() == "dark" else "normal")
 
-            # gambiara para atualizar a cor da barra de título no Windows 10
+            # gambiarra para atualizar a cor da barra de título no Windows 10
             # (não atualiza instantaneamente como no Windows 11)
             self.wm_attributes("-alpha", 0.99)
             self.wm_attributes("-alpha", 1)
 
     def abre_janela_opcoes(self) -> None:
         """ abre um toplevel com as opções disponíveis """
-        self.janela_opcoes:Toplevel = Toplevel(self)
+        self.janela_opcoes: Toplevel = Toplevel(self)
         self.janela_opcoes.minsize(200, 275)
         self.janela_opcoes.transient(self)
         self.janela_opcoes.grab_set()
@@ -336,7 +365,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
         self.lbl_idioma: Label = Label(self.janela_opcoes)
         self.lbl_idioma.pack(pady=5)
         self.btn_pt: Button = Button(
-            self.janela_opcoes,command=lambda: self.define_texto("pt"))
+            self.janela_opcoes, command=lambda: self.define_texto("pt"))
         self.btn_pt.pack(pady=5)
         self.btn_en: Button = Button(
             self.janela_opcoes, command=lambda: self.define_texto("en"))
@@ -376,10 +405,10 @@ class Aplicativo(Tk, IdiomaAplicativo):
 
         try:
             img_caminho: str = self.caminho_arquivo("assets", "cpd-logo.jpg")
-            img_logo: Image = Image.open(img_caminho)
+            img_logo: Image.Image = Image.open(img_caminho)
             img_largura: int = img_logo.size[0]
             img_altura: int = img_logo.size[1]
-            img_logo: Image = img_logo.resize(
+            img_logo = img_logo.resize(
                 (img_largura//6, img_altura//6), Image.LANCZOS)
             logo: PhotoImage = PhotoImage(img_logo)
             lbl_logo: Label = Label(janela_sobre, image=logo, cursor="hand2")
@@ -440,8 +469,8 @@ class Aplicativo(Tk, IdiomaAplicativo):
             f.pack()
 
     def cria_frame(self) -> None:
-        """ abre a janela para carregar novo PDF e adcionar um novo frame """
-        arqs_path: tuple[str] = askopenfilenames(
+        """ abre a janela para carregar novo PDF e adicionar um novo frame """
+        arqs_path: tuple[str, ...] = askopenfilenames(
                 title=self.pega_texto("select"),
                 filetypes=self.tipo_arq)
 

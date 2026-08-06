@@ -68,7 +68,7 @@ def test_merge_cancelado_na_janela_de_salvar(
     app.merge_pdfs()
 
     assert dialogos["avisos"] == [app.pega_texto("no-name")]
-    assert list(tmp_path.iterdir()) == []
+    assert list(tmp_path.glob("**/*.pdf")) == []
 
 
 def test_merge_com_pdf_removido_apos_carregar(

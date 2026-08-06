@@ -20,17 +20,27 @@ Os tipos de alterações
 
 ### Adicionado
 
+- As escolhas de tema e idioma agora são guardadas e restauradas na próxima execução do aplicativo.
 - Barra de rolagem na lista de PDFs carregados, com suporte à roda do mouse; antes, com muitos arquivos, os últimos ficavam fora da janela e inacessíveis.
 - Integração contínua no GitHub Actions executando os testes a cada push.
-- Testes automatizados com [pytest](https://pypi.org/project/pytest/) para a validação de PDFs, os idiomas e o fluxo de junção.
+- Novo arquivo `pyproject.toml` com os metadados do pacote, permitindo instalar o aplicativo via pip.
+- Testes automatizados com [pytest](https://pypi.org/project/pytest/) para a validação de PDFs, os idiomas, as preferências e o fluxo de junção.
 
 ### Alterado
 
+- Ano do copyright unificado nos metadados do executável Windows.
+- As dependências foram separadas entre execução (`requisitos.txt`) e desenvolvimento (`requisitos-dev.txt`).
 - Atualizadas as dependências para versões compatíveis com o Python 3.14.
+- O build passou a usar `--collect-data` para o tema Sun Valley, dispensando o caminho fixo da versão do Python nos comandos.
 - Substituída a biblioteca PyPDF2 (descontinuada) pela sua sucessora [pypdf](https://pypi.org/project/pypdf/).
+
+### Removido
+
+- Textos de idioma que não eram usados pela interface.
 
 ### Corrigido
 
+- Apóstrofos do idioma italiano e erros de digitação em textos, comentários e README.
 - A validação de PDFs agora trata arquivos ilegíveis (sem permissão de leitura, por exemplo) como inválidos em vez de fechar o aplicativo.
 - A janela de salvamento agora retorna apenas o caminho escolhido em vez de abrir e esvaziar o arquivo de destino antes da escrita, o que deixava um arquivo vazio para trás em caso de erro.
 - O logo e o ícone agora são localizados a partir do diretório do código; antes, executar o programa de outro diretório impedia o carregamento deles.

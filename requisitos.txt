@@ -1,15 +1,5 @@
-altgraph==0.17.5
-iniconfig==2.3.0
-jedi==0.20.0
-packaging==26.3
-parso==0.8.7
+# dependências para executar o aplicativo
 pillow==12.3.0
-pluggy==1.6.0
-Pygments==2.20.0
-pyinstaller==6.21.0
-pyinstaller-hooks-contrib==2026.6
 pypdf==6.15.0
-pytest==9.1.1
-pywinstyles==1.8
-setuptools==83.0.0
+pywinstyles==1.8; sys_platform == "win32"
 sv_ttk==2.6.1

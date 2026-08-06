@@ -48,7 +48,7 @@ Então o projeto atual foi criado de forma [open-source](https://pt.wikipedia.or
 Acesse a página de [Download do Juntador de PDFs](https://github.com/ufrgs/pdf_merge/releases) e baixe a versão específica de seu sistema operacional.
 
 Use o botão *Carregar* para abrir a janela e selecionar um ou mais arquivos.
-Eles irão aparecer em uma lista dentro da janela pricipal. Ao lado de cada PDF carregado haverá 3 botões :
+Eles irão aparecer em uma lista dentro da janela principal. Ao lado de cada PDF carregado haverá 3 botões :
 - `X` : para remover aquele PDF em específico;
 - `∧` : para mover o PDF para cima;
 - `∨` : para mover o PDF para baixo;
@@ -70,7 +70,7 @@ Tema :
 
 ## preparação
 
-Abaixo há a realação de comandos necessários para criar um ambiente virtual, ativá-lo e instalar as dependências.
+Abaixo há a relação de comandos necessários para criar um ambiente virtual, ativá-lo e instalar as dependências.
 
 ### linux e macos
 
@@ -86,6 +86,12 @@ pdf_merge❯ pip install -r requisitos.txt
 pdf_merge❯ python -m venv .venv
 pdf_merge❯ .venv\Scripts\activate
 pdf_merge❯ pip install -r requisitos.txt
+```
+
+Para desenvolver (executar os testes ou criar o executável), instale também os requisitos de desenvolvimento :
+
+```bash
+pdf_merge❯ pip install -r requisitos-dev.txt
 ```
 
 Para executar, basta digitar no terminal / prompt de comando :
@@ -115,7 +121,7 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
     --name "juntador-pdfs" \
     --noupx \
     --add-data "pdf_merge/assets/cpd-logo.jpg:pdf_merge/assets" \
-    --add-data ".venv/lib/python3.14/site-packages/sv_ttk:sv_ttk" \
+    --collect-data "sv_ttk" \
     --hidden-import="PIL._tkinter_finder" \
     --noconsole \
     pdf_merge/main.py
@@ -131,7 +137,7 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
     --version-file "version_info.txt" `
     --add-data "pdf_merge/assets/ufrgs.ico;pdf_merge/assets" `
     --add-data "pdf_merge/assets/cpd-logo.jpg;pdf_merge/assets" `
-    --add-data ".venv/Lib/site-packages/sv_ttk;sv_ttk" `
+    --collect-data "sv_ttk" `
     --hidden-import="PIL._tkinter_finder" `
     --noconsole `
      pdf_merge/main.py
@@ -139,7 +145,7 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 ## todo
 
-- [ ] persistir alterações como tema e idioma;
+- [x] persistir alterações como tema e idioma;
 - [x] adicionar remoção individual do frame (atualmente funciona com FILO);
 - [x] adicionar idioma espanhol;
 - [x] adicionar mais idiomas (italiano e alemão);
@@ -149,7 +155,7 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 - `v1.3.0` : PDFs podem ser reorganizados;
 - `v1.2.6` : verificação de PDFs corrompidos e organização;
-- `v1.2.5` : adicionado idioma espanho e removido o \_\_init\_\_.py;
+- `v1.2.5` : adicionado idioma espanhol e removido o \_\_init\_\_.py;
 
 <details>
 <summary>mais antigas</summary>

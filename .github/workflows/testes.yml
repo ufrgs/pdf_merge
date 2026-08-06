@@ -18,7 +18,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes xvfb
-          python -m pip install -r requisitos.txt
+          python -m pip install -r requisitos-dev.txt
 
       # o xvfb cria um display virtual para os testes da interface gráfica
       - name: Executa os testes
