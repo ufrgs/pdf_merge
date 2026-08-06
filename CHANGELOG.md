@@ -18,6 +18,8 @@ Os tipos de alterações
 
 ## [Não Lançado]
 
+## [v1.4.0] - 2026-08-06
+
 ### Adicionado
 
 - As escolhas de tema e idioma agora são guardadas e restauradas na próxima execução do aplicativo.
@@ -165,7 +167,8 @@ Os tipos de alterações
 
 - Desativado os campos de Input para não quebrar o programa ao buscar arquivos com nomes diferentes dos selecionados.
 
-[Não Lançado]: https://github.com/ufrgs/pdf_merge/compare/v1.3.0...HEAD
+[Não Lançado]: https://github.com/ufrgs/pdf_merge/compare/v1.4.0...HEAD
+[v1.4.0]: https://github.com/ufrgs/pdf_merge/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/ufrgs/pdf_merge/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/ufrgs/pdf_merge/compare/v1.0.2...v1.2.0
 [v1.0.2]: https://github.com/ufrgs/pdf_merge/releases/tag/v1.0.2

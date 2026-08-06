@@ -153,13 +153,14 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
 
 ## versões
 
+- `v1.4.0` : temas persistidos e diversas correções de erros;
 - `v1.3.0` : PDFs podem ser reorganizados;
 - `v1.2.6` : verificação de PDFs corrompidos e organização;
-- `v1.2.5` : adicionado idioma espanhol e removido o \_\_init\_\_.py;
 
 <details>
 <summary>mais antigas</summary>
 
+- `v1.2.5` : adicionado idioma espanhol e removido o \_\_init\_\_.py;
 - `v1.2.4` : anotações foram adicionadas;
 - `v1.2.3` : melhor comentários e organização do código;
 - `v1.2.2` : ajustes para o executável;
