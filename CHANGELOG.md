@@ -18,6 +18,10 @@ Os tipos de alterações
 
 ## [Não Lançado]
 
+### Alterado
+
+- README atualizado com a observação de que o macOS requer build manual e com as instruções para fazê-lo.
+
 ## [v1.4.0] - 2026-08-06
 
 ### Adicionado
