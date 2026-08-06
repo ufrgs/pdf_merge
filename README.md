@@ -60,7 +60,7 @@ Quando usar o botão *Juntar*, um novo PDF será criado seguindo a ordem dos doc
 Ele usa o [Python](https://www.python.org/) e a interface gráfica [tkinter](https://docs.python.org/3/library/tkinter.html) para tornar a fusão dos PDFs possível.
 
 Pacotes externos :
-- [PyPDF2](https://pypi.org/project/PyPDF2/) realiza a fusão dos arquivos PDFs;
+- [pypdf](https://pypi.org/project/pypdf/) realiza a fusão dos arquivos PDFs;
 - [pyinstaller](https://pypi.org/project/pyinstaller/) cria o executável;
 - [Pillow](https://pypi.org/project/pillow/) exibe as imagens;
 - [py-window-styles](https://pypi.org/project/pywinstyles/) barra de tarefas do Windows;
@@ -105,7 +105,7 @@ Para criar o executável, é preciso executar o `pyinstaller` a partir do Termin
     --name "juntador-pdfs" \
     --noupx \
     --add-data "pdf_merge/assets/cpd-logo.jpg:pdf_merge/assets" \
-    --add-data ".venv/lib/python3.13/site-packages/sv_ttk:sv_ttk" \
+    --add-data ".venv/lib/python3.14/site-packages/sv_ttk:sv_ttk" \
     --hidden-import="PIL._tkinter_finder" \
     --noconsole \
     pdf_merge/main.py

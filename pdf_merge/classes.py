@@ -8,8 +8,8 @@ import webbrowser
 import sv_ttk
 from PIL import Image
 from PIL.ImageTk import PhotoImage
-from PyPDF2 import PdfReader, PdfWriter
-from PyPDF2.errors import PdfReadError
+from pypdf import PdfReader, PdfWriter
+from pypdf.errors import PdfReadError
 from tkinter import Tk, Toplevel, BOTTOM, LEFT, RIGHT, X
 from tkinter.filedialog import askopenfilenames, asksaveasfile
 from tkinter.messagebox import showinfo, showwarning

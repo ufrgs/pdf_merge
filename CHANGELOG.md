@@ -18,6 +18,11 @@ Os tipos de alterações
 
 ## [Não Lançado]
 
+### Alterado
+
+- Atualizadas as dependências para versões compatíveis com o Python 3.14.
+- Substituída a biblioteca PyPDF2 (descontinuada) pela sua sucessora [pypdf](https://pypi.org/project/pypdf/).
+
 ## [v1.3.0] - 2025-09-30
 
 ### Adicionado
