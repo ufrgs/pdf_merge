@@ -31,6 +31,7 @@ Os tipos de alterações
 
 - A validação de PDFs agora trata arquivos ilegíveis (sem permissão de leitura, por exemplo) como inválidos em vez de fechar o aplicativo.
 - A janela de salvamento agora retorna apenas o caminho escolhido em vez de abrir e esvaziar o arquivo de destino antes da escrita, o que deixava um arquivo vazio para trás em caso de erro.
+- O logo e o ícone agora são localizados a partir do diretório do código; antes, executar o programa de outro diretório impedia o carregamento deles.
 - O aplicativo não fecha mais silenciosamente ao juntar quando um PDF foi apagado, movido ou corrompido após o carregamento, ou quando o destino não pode ser escrito; agora uma mensagem de aviso é exibida.
 
 ## [v1.3.0] - 2025-09-30

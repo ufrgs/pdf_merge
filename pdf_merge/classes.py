@@ -107,10 +107,12 @@ class Aplicativo(Tk, IdiomaAplicativo):
         """ busca o caminho do arquivo, compatível com o PyInstaller """
         # verifica se está em modo executável
         if getattr(sys, "frozen", False):
-            base_path: str = sys._MEIPASS
+            base_path: str = os.path.join(sys._MEIPASS, "pdf_merge")
         else:
-            base_path: str = os.path.abspath(".")
-        return os.path.join(base_path, "pdf_merge", pasta, nome_arquivo)
+            # diretório deste módulo, para funcionar independente de onde o
+            # programa foi executado
+            base_path: str = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(base_path, pasta, nome_arquivo)
 
     def cria_frame_menu(self) -> None:
         """ cria os widgets para o menu do aplicativo """
