@@ -11,7 +11,7 @@ from PIL.ImageTk import PhotoImage
 from pypdf import PdfReader, PdfWriter
 from pypdf.errors import PdfReadError
 from tkinter import Tk, Toplevel, BOTTOM, LEFT, RIGHT, X
-from tkinter.filedialog import askopenfilenames, asksaveasfile
+from tkinter.filedialog import askopenfilenames, asksaveasfilename
 from tkinter.messagebox import showinfo, showwarning
 from tkinter.ttk import Button, Entry, Frame, Label, Separator
 
@@ -389,7 +389,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
                 if len(leitor.pages) == 0:
                     return False
             return True
-        except (PdfReadError, ValueError):
+        except (OSError, PdfReadError, ValueError):
             return False
 
     def merge_pdfs(self) -> None:
@@ -422,7 +422,7 @@ class Aplicativo(Tk, IdiomaAplicativo):
                     + os.path.basename(frame_pdf.path))
                 return
 
-        novo_pdf: str = asksaveasfile(
+        novo_pdf: str = asksaveasfilename(
             filetypes=self.tipo_arq, defaultextension=".pdf")
 
         # nenhum nome foi escolhido para salvar
@@ -432,16 +432,16 @@ class Aplicativo(Tk, IdiomaAplicativo):
             return
 
         try:
-            with open(novo_pdf.name, "wb") as arq:
+            with open(novo_pdf, "wb") as arq:
                 pdf_escritor.write(arq)
         except OSError:
             showwarning(
                 self.pega_texto("warning"),
                 self.pega_texto("write-error")
-                + os.path.basename(novo_pdf.name))
+                + os.path.basename(novo_pdf))
             return
 
         showinfo(
             self.pega_texto("success"),
-            self.pega_texto("success-msg") + os.path.basename(novo_pdf.name))
+            self.pega_texto("success-msg") + os.path.basename(novo_pdf))
 
